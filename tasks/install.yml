@@ -4,11 +4,11 @@
   apt_repository:
     repo="{{ apache_repository }}"
     update_cache=yes
-  when: apache_repository != false
+  when: apache_repository is defined
 
 - name: Install packages.
   apt:
     pkg="{{ item }}"
     state=present
   with_items: apache_install
-  when: apache_install != false
+  when: apache_install is defined

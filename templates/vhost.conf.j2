@@ -3,9 +3,12 @@ DirectoryIndex {{ item.index | default('index.html') }}
     {{ extra }}
 {% endfor %}{% endif %}
 
-<VirtualHost *:{{ item.port | default('80') }}>
+<VirtualHost *:{{ apache_listen_port | default('80') }}>
     ServerName {{ item.servername }}
-    DocumentRoot {{ item.documentroot }}
+    {% if item.serveralias is defined %}
+    ServerAlias {{ item.serveralias }}
+    {% endif %}
+    DocumentRoot {{ item.documentRoot }}
     ErrorLog {{ item.logDir | default('${APACHE_LOG_DIR}') }}/error.log
     CustomLog {{ item.logDir | default('${APACHE_LOG_DIR}') }}/access.log combined
     {% if item.serveradmin is defined %}ServerAdmin {{ item.serveradmin }}{% endif %}
@@ -14,7 +17,7 @@ DirectoryIndex {{ item.index | default('index.html') }}
     {{ extra }}
 {% endfor %}{% endif %}
 
-    <Directory "{{ item.documentroot }}">
+    <Directory "{{ item.documentRoot }}">
         AllowOverride All
         Options -Indexes +FollowSymLinks
         Order allow,deny
@@ -27,3 +30,47 @@ DirectoryIndex {{ item.index | default('index.html') }}
 
     </Directory>
 </VirtualHost>
+
+
+
+{% if item.extra is defined %}{% for extra in item.extra %}
+    {{ extra }}
+{% endfor %}{% endif %}
+
+{% if item.ssl is defined %}
+<VirtualHost *:{{ apache_listen_port_ssl | default('443') }}>
+    ServerName {{ item.servername }}
+    DocumentRoot {{ item.documentRoot }}
+    ErrorLog {{ item.logDir | default('${APACHE_LOG_DIR}') }}/error.log
+    CustomLog {{ item.logDir | default('${APACHE_LOG_DIR}') }}/access.log combined
+    {% if item.serveradmin is defined %}ServerAdmin {{ item.serveradmin }}{% endif %}
+    
+    SSLEngine on
+    SSLCipherSuite {{ apache_ssl_cipher_suite }}
+    SSLProtocol {{ apache_ssl_protocol }}
+    SSLHonorCipherOrder On
+    SSLCompression off
+    SSLCertificateFile {{ item.certificate_file }}
+    SSLCertificateKeyFile {{ item.certificate_key_file }}
+    {% if item.certificate_chain_file is defined %}
+      SSLCertificateChainFile {{ item.certificate_chain_file }}
+    {% endif %}
+
+{% if item.virtualhost_extra is defined %}{% for extra in item.virtualhost_extra %}
+    {{ extra }}
+{% endfor %}{% endif %}
+
+    <Directory "{{ item.documentRoot }}">
+        AllowOverride All
+        Options -Indexes +FollowSymLinks
+        Order allow,deny
+        Allow from all
+        Require all granted
+
+{% if item.directory_extra is defined %}{% for extra in item.directory_extra %}
+        {{ extra }}
+{% endfor %}{% endif %}
+
+    </Directory>
+</VirtualHost>
+{% endif %}

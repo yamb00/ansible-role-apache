@@ -7,7 +7,7 @@
   changed_when: apache_cmd.stdout.endswith(' already disabled') == false
   notify: Restart apache
   with_items: apache_module_disable
-  when: apache_module_disable != false
+  when: apache_module_disable is defined
 
 - name: Enable apache module
   shell:
@@ -16,4 +16,4 @@
   changed_when: apache_cmd.stdout.endswith(' already enabled') == false
   notify: Restart apache
   with_items: apache_module_enable
-  when: apache_module_enable != false
+  when: apache_module_enable is defined
