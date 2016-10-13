@@ -31,7 +31,7 @@ Install and configure apache.
 ## Example Playbook
 
     roles:
-      - { role: kosssi.apache, tags: apache }
+      - { role: yamb00.apache, tags: apache }
 
 ## License
 
